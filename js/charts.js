@@ -52,7 +52,29 @@ function drawDonutChart(canvas, { title, segments }) {
   const outerR = 290;
   const innerR = 175;
 
-  if (total > 0) {
+  if (total > 0 && visible.length === 1) {
+    // A single category covers the whole ring. Draw it as plain filled
+    // circles (no start/end seam) instead of an arc path, which would
+    // otherwise leave a visible spoke where the arc closes on itself.
+    const seg = visible[0];
+    ctx.beginPath();
+    ctx.arc(cx, cy, outerR, 0, Math.PI * 2);
+    ctx.fillStyle = seg.color;
+    ctx.fill();
+
+    ctx.beginPath();
+    ctx.arc(cx, cy, innerR, 0, Math.PI * 2);
+    ctx.fillStyle = '#000000';
+    ctx.fill();
+
+    // Value label, centered at the top of the ring
+    const midR = (outerR + innerR) / 2;
+    ctx.fillStyle = '#000000';
+    ctx.font = `800 38px ${fontFamily}`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(formatMinutesAsHM(seg.value), cx, cy - midR);
+  } else if (total > 0) {
     let startAngle = -Math.PI / 2;
     visible.forEach((seg) => {
       const sweep = (seg.value / total) * Math.PI * 2;
