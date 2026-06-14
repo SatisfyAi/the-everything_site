@@ -16,7 +16,7 @@ repo being public.
 
 ## 1. Create the private data repo
 
-1. Create a **new private repo**, e.g. `time-tracker-data`.
+1. Create a **new private repo**, e.g. `the-everything-site_data`.
 2. You don't need to add anything to it - the app will create `data.json`
    automatically the first time you save a session.
 
@@ -27,7 +27,7 @@ repo being public.
 2. Give it a name, set an expiry (you'll need to regenerate it when it
    expires).
 3. Under **Repository access**, choose **Only select repositories** and pick
-   `time-tracker-data` (the private repo from step 1) - **not** the app
+   `the-everything-site_data` (the private repo from step 1) - **not** the app
    repo.
 4. Under **Permissions → Repository permissions**, set **Contents** to
    **Read and write**. Everything else can stay "No access".
@@ -35,17 +35,17 @@ repo being public.
 
 ⚠️ This token lives in your browser's local storage. Anyone with access to
 your browser/device (or who reads it out of local storage) could use it to
-read/write `time-tracker-data`. Keep that repo private and only grant the
+read/write `the-everything-site_data`. Keep that repo private and only grant the
 token access to it.
 
 ## 3. Create the public app repo and enable Pages
 
-1. Create a **new public repo**, e.g. `time-tracker`.
+1. Create a **new public repo**, e.g. `the-everything-site`.
 2. Push the contents of this folder (`index.html`, `style.css`, `js/`) to it.
 3. In that repo, go to **Settings → Pages**, set the source to your branch
    (e.g. `main`) and the root folder.
 4. GitHub will give you a URL like
-   `https://yourusername.github.io/time-tracker/`.
+   `https://yourusername.github.io/the-everything-site/`.
 
 ## 4. Configure the app
 
@@ -53,7 +53,7 @@ token access to it.
 2. Go to the **Settings** tab inside the app and fill in:
    - **Personal access token** - from step 2
    - **Repo owner** - your GitHub username
-   - **Repo name** - `time-tracker-data` (the **private** repo from step 1,
+   - **Repo name** - `the-everything-site_data (the **private** repo from step 1,
      not the app repo)
    - **Branch** - usually `main`
    - **File path** - `data.json` (default is fine)
