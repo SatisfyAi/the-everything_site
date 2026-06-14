@@ -3,9 +3,7 @@
 const state = {
   data: { categories: DEFAULT_CATEGORIES.slice(), sessions: [] },
   sha: null,
-  dashboardMonth: monthKey(new Date()),
-  comparison: { period: 'week', offset: 0 },
-  barChart: null,
+  dashboard: { period: 'month', offset: 0 },
   editingId: null,
 };
 
@@ -481,82 +479,42 @@ function resetEntryForm() {
 // ===================== Dashboard tab =====================
 
 function setupDashboardNav() {
-  document.getElementById('dashboard-prev-month').onclick = () => {
-    const [y, m] = state.dashboardMonth.split('-').map(Number);
-    state.dashboardMonth = monthKey(new Date(y, m - 2, 1));
-    renderDashboardTab();
-    renderHistoryTab();
-  };
-  document.getElementById('dashboard-next-month').onclick = () => {
-    const [y, m] = state.dashboardMonth.split('-').map(Number);
-    state.dashboardMonth = monthKey(new Date(y, m, 1));
-    renderDashboardTab();
-    renderHistoryTab();
-  };
-  document.getElementById('download-donut').onclick = () => {
-    const canvas = document.getElementById('donut-canvas');
-    const link = document.createElement('a');
-    link.download = `TT-${state.dashboardMonth}.png`;
-    link.href = canvas.toDataURL('image/png');
-    link.click();
-  };
-
   document.querySelectorAll('.period-btn').forEach((btn) => {
     btn.onclick = () => {
-      state.comparison.period = btn.dataset.period;
-      state.comparison.offset = 0;
+      state.dashboard.period = btn.dataset.period;
+      state.dashboard.offset = 0;
       document
         .querySelectorAll('.period-btn')
         .forEach((b) => b.classList.toggle('active', b === btn));
-      renderComparisonChart();
+      renderDashboardTab();
     };
   });
-  document.getElementById('comparison-prev').onclick = () => {
-    state.comparison.offset++;
-    renderComparisonChart();
+
+  document.getElementById('dashboard-prev').onclick = () => {
+    state.dashboard.offset++;
+    renderDashboardTab();
   };
-  document.getElementById('comparison-next').onclick = () => {
-    if (state.comparison.offset > 0) {
-      state.comparison.offset--;
-      renderComparisonChart();
+  document.getElementById('dashboard-next').onclick = () => {
+    if (state.dashboard.offset > 0) {
+      state.dashboard.offset--;
+      renderDashboardTab();
     }
+  };
+
+  document.getElementById('download-donut').onclick = () => {
+    const canvas = document.getElementById('donut-canvas');
+    const range = getDashboardRange();
+    const slug = range.title
+      .replace(/[^a-zA-Z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '');
+    const link = document.createElement('a');
+    link.download = `TT-${slug}.png`;
+    link.href = canvas.toDataURL('image/png');
+    link.click();
   };
 }
 
-function renderDashboardTab() {
-  const [y, m] = state.dashboardMonth.split('-').map(Number);
-  const monthStart = new Date(y, m - 1, 1);
-  const monthEnd = new Date(y, m, 1);
-
-  document.getElementById('dashboard-month-label').textContent = monthLabel(
-    state.dashboardMonth,
-  );
-
-  const totals = {};
-  state.data.sessions.forEach((s) => {
-    const d = new Date(s.startDate);
-    if (d >= monthStart && d < monthEnd) {
-      totals[s.category] = (totals[s.category] || 0) + s.minutes;
-    }
-  });
-
-  const segments = state.data.categories.map((c) => ({
-    label: c.label,
-    color: c.color,
-    value: totals[c.key] || 0,
-  }));
-  drawDonutChart(document.getElementById('donut-canvas'), {
-    title: monthLabel(state.dashboardMonth),
-    segments,
-  });
-
-  renderComparisonChart();
-}
-
-// ----- Comparison chart -----
-
-const PERIOD_COUNTS = { day: 7, week: 8, month: 12, year: 5 };
-
+// Start-of-period helpers, used for the dashboard range.
 function startOfPeriod(date, period) {
   const d = new Date(date);
   d.setHours(0, 0, 0, 0);
@@ -580,60 +538,85 @@ function addPeriods(date, period, n) {
   return d;
 }
 
-function periodLabel(date, period) {
-  if (period === 'day')
-    return date.toLocaleDateString(undefined, {
-      weekday: 'short',
-      day: 'numeric',
-      month: 'short',
-    });
-  if (period === 'week')
-    return date.toLocaleDateString(undefined, {
-      day: 'numeric',
-      month: 'short',
-    });
-  if (period === 'month')
-    return date.toLocaleDateString(undefined, {
-      month: 'short',
-      year: '2-digit',
-    });
-  return String(date.getFullYear());
-}
+// Computes { start, end, title } for the current dashboard period + offset.
+// start/end are null for "all" (no date filtering).
+function getDashboardRange() {
+  const { period, offset } = state.dashboard;
 
-function renderComparisonChart() {
-  const period = state.comparison.period;
-  const count = PERIOD_COUNTS[period];
-  const base = startOfPeriod(new Date(), period);
-
-  const buckets = [];
-  for (let i = 0; i < count; i++) {
-    const stepsBack = state.comparison.offset * count + (count - 1 - i);
-    const periodStart = addPeriods(base, period, -stepsBack);
-    const periodEnd = addPeriods(periodStart, period, 1);
-
-    const totals = {};
-    state.data.sessions.forEach((s) => {
-      const d = new Date(s.startDate);
-      if (d >= periodStart && d < periodEnd) {
-        totals[s.category] = (totals[s.category] || 0) + s.minutes;
-      }
-    });
-    buckets.push({ label: periodLabel(periodStart, period), totals });
+  if (period === 'all') {
+    return { start: null, end: null, title: 'All time' };
   }
 
-  state.barChart = renderBarChart(
-    document.getElementById('bar-canvas'),
-    state.data.categories,
-    buckets,
-    state.barChart,
-  );
+  const base = startOfPeriod(new Date(), period);
+  const start = addPeriods(base, period, -offset);
+  const end = addPeriods(start, period, 1);
+  return { start, end, title: formatRangeTitle(start, end, period) };
+}
 
-  const first = buckets[0];
-  const last = buckets[buckets.length - 1];
-  document.getElementById('comparison-range-label').textContent =
-    `${first.label} – ${last.label}`;
-  document.getElementById('comparison-next').disabled =
-    state.comparison.offset === 0;
+function formatRangeTitle(start, end, period) {
+  if (period === 'day') {
+    return start.toLocaleDateString(undefined, {
+      weekday: 'short',
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric',
+    });
+  }
+  if (period === 'month') {
+    return start.toLocaleDateString(undefined, {
+      month: 'long',
+      year: 'numeric',
+    });
+  }
+  if (period === 'year') {
+    return String(start.getFullYear());
+  }
+
+  // week: end is exclusive, so the last day shown is end - 1 day
+  const lastDay = new Date(end.getTime() - 24 * 3600 * 1000);
+  const sameMonth =
+    start.getMonth() === lastDay.getMonth() &&
+    start.getFullYear() === lastDay.getFullYear();
+  const sameYear = start.getFullYear() === lastDay.getFullYear();
+
+  if (sameMonth) {
+    return `${start.getDate()} – ${lastDay.getDate()} ${lastDay.toLocaleDateString(undefined, { month: 'long' })} ${lastDay.getFullYear()}`;
+  }
+  if (sameYear) {
+    return `${start.toLocaleDateString(undefined, { day: 'numeric', month: 'short' })} – ${lastDay.toLocaleDateString(undefined, { day: 'numeric', month: 'short' })} ${lastDay.getFullYear()}`;
+  }
+  return `${start.toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' })} – ${lastDay.toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' })}`;
+}
+
+function renderDashboardTab() {
+  const range = getDashboardRange();
+
+  const totals = {};
+  state.data.sessions.forEach((s) => {
+    const d = new Date(s.startDate);
+    if (range.start && (d < range.start || d >= range.end)) return;
+    totals[s.category] = (totals[s.category] || 0) + s.minutes;
+  });
+
+  const segments = state.data.categories.map((c) => ({
+    label: c.label,
+    color: c.color,
+    value: totals[c.key] || 0,
+  }));
+  drawDonutChart(document.getElementById('donut-canvas'), {
+    title: range.title,
+    segments,
+  });
+
+  document.getElementById('dashboard-range-label').textContent = range.title;
+
+  const isAll = state.dashboard.period === 'all';
+  document.getElementById('dashboard-prev').hidden = isAll;
+  document.getElementById('dashboard-next').hidden = isAll;
+  if (!isAll) {
+    document.getElementById('dashboard-next').disabled =
+      state.dashboard.offset === 0;
+  }
 }
 
 // ===================== History tab =====================
@@ -646,14 +629,14 @@ function getMonthsWithData() {
   const months = new Set(
     state.data.sessions.map((s) => monthKey(new Date(s.startDate))),
   );
-  months.add(state.dashboardMonth);
+  months.add(monthKey(new Date()));
   return Array.from(months).sort().reverse();
 }
 
 function renderHistoryTab() {
   const monthSelect = document.getElementById('history-month-select');
   const months = getMonthsWithData();
-  const current = monthSelect.value || state.dashboardMonth;
+  const current = monthSelect.value || monthKey(new Date());
 
   monthSelect.innerHTML =
     `<option value="all">All time</option>` +
