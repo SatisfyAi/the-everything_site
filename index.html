@@ -141,67 +141,37 @@
     <!-- ===================== Dashboard ===================== -->
     <section class="tab-panel" id="tab-dashboard">
       <div class="card">
-        <div class="month-nav">
-          <button
-            class="icon-btn"
-            id="dashboard-prev-month"
-            type="button"
-            title="Previous month"
-          >
-            ‹
-          </button>
-          <div class="month-label" id="dashboard-month-label">-</div>
-          <button
-            class="icon-btn"
-            id="dashboard-next-month"
-            type="button"
-            title="Next month"
-          >
-            ›
-          </button>
-        </div>
-
-        <div class="donut-wrap">
-          <canvas id="donut-canvas" width="1200" height="800"></canvas>
-        </div>
-
-        <div class="download-row">
-          <button class="btn btn-secondary" id="download-donut" type="button">
-            Download as image
-          </button>
-        </div>
-      </div>
-
-      <div class="card">
-        <h2>Comparisons</h2>
         <div class="period-tabs">
           <button class="period-btn" data-period="day" type="button">
             Day
           </button>
-          <button class="period-btn active" data-period="week" type="button">
+          <button class="period-btn" data-period="week" type="button">
             Week
           </button>
-          <button class="period-btn" data-period="month" type="button">
+          <button class="period-btn active" data-period="month" type="button">
             Month
           </button>
           <button class="period-btn" data-period="year" type="button">
             Year
           </button>
+          <button class="period-btn" data-period="all" type="button">
+            All time
+          </button>
         </div>
 
-        <div class="comparison-nav">
+        <div class="month-nav">
           <button
             class="icon-btn"
-            id="comparison-prev"
+            id="dashboard-prev"
             type="button"
             title="Earlier"
           >
             ‹
           </button>
-          <div class="range-label" id="comparison-range-label">-</div>
+          <div class="month-label" id="dashboard-range-label">-</div>
           <button
             class="icon-btn"
-            id="comparison-next"
+            id="dashboard-next"
             type="button"
             title="Later"
           >
@@ -209,8 +179,14 @@
           </button>
         </div>
 
-        <div class="chart-wrap">
-          <canvas id="bar-canvas"></canvas>
+        <div class="donut-wrap">
+          <canvas id="donut-canvas" width="1300" height="760"></canvas>
+        </div>
+
+        <div class="download-row">
+          <button class="btn btn-secondary" id="download-donut" type="button">
+            Download as image
+          </button>
         </div>
       </div>
     </section>
@@ -325,7 +301,6 @@
       </div>
     </section>
 
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="js/categories.js"></script>
     <script src="js/github.js"></script>
     <script src="js/timer.js"></script>
