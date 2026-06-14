@@ -117,7 +117,7 @@
 
         <div>
           <label>Duration</label>
-          <div class="duration-readout" id="entry-duration">—</div>
+          <div class="duration-readout" id="entry-duration">-</div>
         </div>
 
         <div class="entry-actions">
@@ -148,7 +148,7 @@
           >
             ‹
           </button>
-          <div class="month-label" id="dashboard-month-label">—</div>
+          <div class="month-label" id="dashboard-month-label">-</div>
           <button
             class="icon-btn"
             id="dashboard-next-month"
@@ -196,7 +196,7 @@
           >
             ‹
           </button>
-          <div class="range-label" id="comparison-range-label">—</div>
+          <div class="range-label" id="comparison-range-label">-</div>
           <button
             class="icon-btn"
             id="comparison-next"
@@ -259,7 +259,7 @@
         </div>
         <p class="help-text">
           Categories with logged time can't be deleted, but you can rename them
-          or change their colour at any time — changes apply to all past entries
+          or change their colour at any time - changes apply to all past entries
           too.
         </p>
       </div>
@@ -270,10 +270,13 @@
       <div class="card">
         <h2>GitHub sync</h2>
         <p class="help-text">
-          Data is stored as a JSON file in a GitHub repo. Use a
-          <strong>private repo</strong> and a
+          Data is stored as a JSON file in a GitHub repo. This repo can be
+          <strong>different from the one hosting this page</strong> - in fact,
+          for GitHub Pages on a free plan, the hosting repo needs to be public,
+          so it's recommended to keep your data in a separate
+          <strong>private repo</strong>. Use a
           <strong>fine-grained personal access token</strong> scoped to just
-          that repo with read &amp; write access to "Contents".
+          that data repo with read &amp; write access to "Contents".
         </p>
 
         <div class="form-row">
@@ -322,7 +325,7 @@
         <div class="settings-status" id="settings-status"></div>
 
         <p class="help-text">
-          Your token is stored only in this browser's local storage — it is
+          Your token is stored only in this browser's local storage - it is
           never sent anywhere except directly to
           <code>api.github.com</code>. If you use the app on another device,
           you'll need to enter the token there too.
