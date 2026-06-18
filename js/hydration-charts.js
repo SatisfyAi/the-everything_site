@@ -9,7 +9,7 @@ function formatMl(totalMl) {
 
 // Draws a hydration donut chart.
 // Clean ring with no in-segment labels. Legend on the right shows
-// "Label — value" on a single line per category.
+// "Label - value" on a single line per category.
 // `segments` is an array of { label, color, value } where value is in millilitres.
 //
 // Canvas height grows dynamically so the legend is never clipped.
@@ -35,7 +35,7 @@ function drawDonutChart(canvas, { title, segments }) {
   const ctx = canvas.getContext('2d');
 
   // ---- Legend layout ----
-  // Each entry is one line: "Label — value"
+  // Each entry is one line: "Label - value"
   // Shrink font until everything fits within the donut's vertical span.
   let fontSize = 38;
   const minFontSize = 22;
@@ -76,7 +76,7 @@ function drawDonutChart(canvas, { title, segments }) {
 
   // ---- Donut ring (no in-segment labels) ----
   if (total > 0 && visible.length === 1) {
-    // Full ring — single color, no seam
+    // Full ring - single color, no seam
     ctx.beginPath();
     ctx.arc(cx, cy, outerR, 0, Math.PI * 2);
     ctx.fillStyle = visible[0].color;
@@ -135,14 +135,14 @@ function drawDonutChart(canvas, { title, segments }) {
   ctx.font = `800 ${totalFontSize}px ${fontFamily}`;
   ctx.fillText(totalLabel, cx, cy + totalFontSize * 0.5);
 
-  // ---- Legend: "Label — value" one line per entry, vertically centered ----
+  // ---- Legend: "Label - value" one line per entry, vertically centered ----
   const blockHeight = legendTotalHeight(fontSize);
   let legendY = cy - blockHeight / 2;
 
   ctx.textAlign = 'left';
   ctx.textBaseline = 'top';
 
-  const sep = '  —  ';
+  const sep = '  -  ';
 
   visible.forEach((seg) => {
     ctx.font = `800 ${fontSize}px ${fontFamily}`;

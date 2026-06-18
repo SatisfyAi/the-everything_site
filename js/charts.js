@@ -15,7 +15,7 @@ function formatMinutesAsHM(totalMinutes) {
 
 // Draws a time-tracking donut chart.
 // Clean ring with no in-segment labels. Legend on the right shows
-// "Label — H:MM" on each line (wrapping long labels to a second line
+// "Label - H:MM" on each line (wrapping long labels to a second line
 // with the value aligned after).
 // `segments` is an array of { label, color, value } where value is in minutes.
 //
@@ -50,10 +50,10 @@ function drawDonutChart(canvas, { title, segments }) {
     ctx.font = `800 ${fs}px ${fontFamily}`;
     const lineH = fs * 1.55;
     const gap = fs * 0.7;
-    const sep = '  —  ';
+    const sep = '  -  ';
     let totalH = 0;
     const entries = visible.map((seg) => {
-      // Try to fit "Label — H:MM" on one line; wrap label if needed
+      // Try to fit "Label - H:MM" on one line; wrap label if needed
       const valueStr = formatMinutesAsHM(seg.value);
       const fullLine = seg.label + sep + valueStr;
       const fullW = ctx.measureText(fullLine).width;
@@ -61,7 +61,7 @@ function drawDonutChart(canvas, { title, segments }) {
       if (fullW <= maxLegendWidth) {
         lines = [fullLine];
       } else {
-        // Wrap: put label line(s) then "— value" on last line
+        // Wrap: put label line(s) then "- value" on last line
         const words = seg.label.split(' ');
         const wrapped = [];
         let cur = '';
@@ -169,7 +169,7 @@ function drawDonutChart(canvas, { title, segments }) {
   ctx.font = `800 ${totalFontSize}px ${fontFamily}`;
   ctx.fillText(totalLabel, cx, cy + totalFontSize * 0.5);
 
-  // ---- Legend: "Label — H:MM", vertically centered ----
+  // ---- Legend: "Label - H:MM", vertically centered ----
   let legendY = cy - layout.totalH / 2;
   ctx.textBaseline = 'top';
 
@@ -178,7 +178,7 @@ function drawDonutChart(canvas, { title, segments }) {
     lines.forEach((line, i) => {
       // Color each part of the line individually on the last line;
       // pure label lines get the category color.
-      const sep = '  —  ';
+      const sep = '  -  ';
       const sepIdx = line.indexOf(sep);
       if (sepIdx === -1) {
         // Pure label line
@@ -186,7 +186,7 @@ function drawDonutChart(canvas, { title, segments }) {
         ctx.textAlign = 'left';
         ctx.fillText(line, legendX, legendY + i * layout.lineH);
       } else {
-        // Line contains "label part — value"
+        // Line contains "label part - value"
         const labelPart = line.slice(0, sepIdx);
         const valuePart = line.slice(sepIdx + sep.length);
         let x = legendX;
