@@ -32,7 +32,6 @@ body {
 .app-header {
   display: flex;
   align-items: center;
-  justify-content: space-between;
   padding: 18px 20px 10px;
   flex-wrap: wrap;
   gap: 8px;
@@ -43,6 +42,24 @@ body {
   font-weight: 800;
   margin: 0;
   letter-spacing: 0.5px;
+  flex: 1;
+  text-align: center;
+}
+
+.back-link {
+  color: var(--text-dim);
+  text-decoration: none;
+  font-weight: 700;
+  font-size: 0.9rem;
+  padding: 8px 12px;
+  border: 1px solid var(--panel-border);
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
+.back-link:hover {
+  color: var(--text);
+  border-color: var(--text-dim);
 }
 
 .sync-status {
@@ -293,9 +310,62 @@ input[type='color'] {
 
 .form-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
   gap: 12px;
   margin-bottom: 14px;
+}
+
+/* Two equal columns that stack to one column below 400px */
+.form-grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+@media (max-width: 400px) {
+  .form-grid-2 {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Time tracker has 3 fields; on narrow screens stack date full-width,
+   then start/end share a row. Use a named grid for the 3-column case. */
+.form-grid-3 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.form-grid-3 .form-row:first-child {
+  grid-column: 1 / -1;
+}
+
+/* ---------- Drag-and-drop reordering ---------- */
+
+.drag-handle {
+  cursor: grab;
+  color: var(--text-dim);
+  font-size: 1.2rem;
+  line-height: 1;
+  padding: 0 4px;
+  user-select: none;
+  flex-shrink: 0;
+}
+
+.drag-handle:active {
+  cursor: grabbing;
+}
+
+.category-row.dragging {
+  opacity: 0.4;
+}
+
+.category-row.drag-over {
+  outline: 2px solid var(--accent);
+  border-radius: 10px;
+  background: #1a1400;
 }
 
 .form-row {
@@ -403,27 +473,6 @@ input[type='color'] {
   border-color: var(--accent);
 }
 
-.comparison-nav {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 14px;
-  margin: 10px 0;
-}
-
-.comparison-nav .range-label {
-  color: var(--text-dim);
-  font-weight: 700;
-  font-size: 0.9rem;
-  min-width: 140px;
-  text-align: center;
-}
-
-.chart-wrap {
-  position: relative;
-  height: 320px;
-}
-
 /* ---------- History table ---------- */
 
 .history-controls {
@@ -526,9 +575,174 @@ td.empty {
   margin-top: 10px;
 }
 
-.help-text code {
+/* ---------- Hydration preset chips ---------- */
+
+.preset-chip {
+  padding: 9px 14px;
+  border-radius: 999px;
+  border: 2px solid var(--panel-border);
+  background: transparent;
+  color: var(--text-dim);
+  font-family: inherit;
+  font-weight: 700;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition:
+    background 0.15s,
+    color 0.15s,
+    border-color 0.15s;
+}
+
+.preset-chip.selected {
+  background: var(--accent);
+  color: #1a1400;
+  border-color: var(--accent);
+}
+
+.preset-chip:hover:not(.selected) {
+  border-color: var(--text-dim);
+  color: var(--text);
+}
+
+input[type='number'] {
+  width: 100%;
+  padding: 11px 12px;
+  border-radius: 10px;
+  border: 1px solid var(--panel-border);
   background: #0d0d0d;
-  padding: 2px 6px;
-  border-radius: 6px;
-  font-size: 0.8rem;
+  color: var(--text);
+  font-family: inherit;
+  font-size: 0.95rem;
+}
+
+/* ---------- Mobile responsive ---------- */
+
+@media (max-width: 520px) {
+  .app-header {
+    padding: 14px 14px 8px;
+    gap: 6px;
+  }
+
+  .app-header h1 {
+    font-size: 1.2rem;
+  }
+
+  .back-link {
+    font-size: 0.8rem;
+    padding: 6px 10px;
+  }
+
+  .sync-status {
+    font-size: 0.75rem;
+  }
+
+  .tabs {
+    padding: 0 10px 10px;
+    gap: 5px;
+  }
+
+  .tab-btn {
+    padding: 8px 12px;
+    font-size: 0.8rem;
+  }
+
+  .tab-panel {
+    padding: 0 10px 16px;
+  }
+
+  .card {
+    padding: 14px;
+    margin-bottom: 12px;
+  }
+
+  .card h2 {
+    font-size: 0.95rem;
+    margin-bottom: 10px;
+  }
+
+  .category-picker {
+    gap: 6px;
+    margin-bottom: 12px;
+  }
+
+  .cat-chip {
+    padding: 7px 11px;
+    font-size: 0.78rem;
+  }
+
+  .preset-chip {
+    padding: 7px 11px;
+    font-size: 0.78rem;
+  }
+
+  .timer-display {
+    font-size: clamp(2.5rem, 16vw, 3.5rem);
+  }
+
+  .timer-controls {
+    gap: 8px;
+  }
+
+  .btn {
+    padding: 10px 16px;
+    font-size: 0.85rem;
+  }
+
+  .month-nav {
+    gap: 8px;
+  }
+
+  .month-nav .month-label {
+    font-size: 0.95rem;
+    min-width: 120px;
+  }
+
+  .period-tabs {
+    gap: 5px;
+  }
+
+  .period-btn {
+    padding: 7px 10px;
+    font-size: 0.78rem;
+  }
+
+  .hub-grid {
+    padding: 16px 12px 40px;
+    gap: 14px;
+  }
+
+  .hub-card {
+    padding: 20px 16px;
+  }
+
+  .hub-card-icon {
+    width: 44px;
+    height: 44px;
+  }
+
+  .hub-card-title {
+    font-size: 1.1rem;
+  }
+
+  table {
+    font-size: 0.78rem;
+  }
+
+  th,
+  td {
+    padding: 8px 5px;
+  }
+
+  .category-row {
+    flex-wrap: wrap;
+    gap: 7px;
+  }
+
+  .cat-hex-input {
+    max-width: 80px;
+  }
+
+  .add-category-row {
+    gap: 8px;
+  }
 }
