@@ -1,22 +1,28 @@
 // Thin wrapper around the GitHub Contents API.
 // Reads/writes a single JSON file (settings.path) in settings.owner/settings.repo.
+//
+// Namespaced by `appKey` so multiple apps on the same hub (Time Tracker,
+// Hydration Tracker, ...) can each have their own localStorage settings,
+// even though they may point at the same repo with different file paths.
 
-const GH_SETTINGS_KEY = 'tt_github_settings';
+function ghSettingsKey(appKey) {
+  return `gh_settings_${appKey}`;
+}
 
-function ghGetSettings() {
+function ghGetSettings(appKey) {
   try {
-    return JSON.parse(localStorage.getItem(GH_SETTINGS_KEY)) || null;
+    return JSON.parse(localStorage.getItem(ghSettingsKey(appKey))) || null;
   } catch {
     return null;
   }
 }
 
-function ghSaveSettings(settings) {
-  localStorage.setItem(GH_SETTINGS_KEY, JSON.stringify(settings));
+function ghSaveSettings(appKey, settings) {
+  localStorage.setItem(ghSettingsKey(appKey), JSON.stringify(settings));
 }
 
-function ghConfigured() {
-  const s = ghGetSettings();
+function ghConfigured(appKey) {
+  const s = ghGetSettings(appKey);
   return !!(s && s.token && s.owner && s.repo && s.path);
 }
 
@@ -33,8 +39,8 @@ function ghApiUrl(s) {
   return `https://api.github.com/repos/${s.owner}/${s.repo}/contents/${s.path}${branch}`;
 }
 
-async function ghRequest(url, options = {}) {
-  const s = ghGetSettings();
+async function ghRequest(appKey, url, options = {}) {
+  const s = ghGetSettings(appKey);
   if (!s || !s.token) throw new Error('GitHub is not configured yet.');
   const res = await fetch(url, {
     ...options,
@@ -49,43 +55,38 @@ async function ghRequest(url, options = {}) {
 }
 
 // Loads the data file. Returns { data, sha }.
-// If the file doesn't exist yet, returns a fresh empty structure with sha = null.
-async function ghLoad() {
-  const s = ghGetSettings();
+// If the file doesn't exist yet, returns `emptyData` (a fresh structure) with sha = null.
+async function ghLoad(appKey, emptyData) {
+  const s = ghGetSettings(appKey);
   if (!s) throw new Error('GitHub is not configured yet.');
-  const res = await ghRequest(ghApiUrl(s));
+  const res = await ghRequest(appKey, ghApiUrl(s));
 
   if (res.status === 404) {
-    return {
-      data: { categories: DEFAULT_CATEGORIES, sessions: [] },
-      sha: null,
-    };
+    return { data: emptyData, sha: null };
   }
   if (!res.ok) {
     throw new Error(`GitHub load failed: ${res.status} ${res.statusText}`);
   }
   const json = await res.json();
   const content = JSON.parse(b64DecodeUnicode(json.content.replace(/\n/g, '')));
-  content.categories = content.categories || DEFAULT_CATEGORIES;
-  content.sessions = content.sessions || [];
   return { data: content, sha: json.sha };
 }
 
 // Saves the data file. Returns the new sha.
 // Throws an Error with `.conflict = true` if the remote file has changed
 // since `sha` was fetched (HTTP 409 or 422 sha mismatch).
-async function ghSave(data, sha, message) {
-  const s = ghGetSettings();
+async function ghSave(appKey, data, sha, message) {
+  const s = ghGetSettings(appKey);
   if (!s) throw new Error('GitHub is not configured yet.');
 
   const body = {
-    message: message || 'Update time tracking data',
+    message: message || 'Update data',
     content: b64EncodeUnicode(JSON.stringify(data, null, 2)),
     branch: s.branch || undefined,
   };
   if (sha) body.sha = sha;
 
-  const res = await ghRequest(ghApiUrl(s), {
+  const res = await ghRequest(appKey, ghApiUrl(s), {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(body),
@@ -107,10 +108,11 @@ async function ghSave(data, sha, message) {
 }
 
 // Tests credentials by fetching basic repo info.
-async function ghTestConnection() {
-  const s = ghGetSettings();
+async function ghTestConnection(appKey) {
+  const s = ghGetSettings(appKey);
   if (!s) throw new Error('GitHub is not configured yet.');
   const res = await ghRequest(
+    appKey,
     `https://api.github.com/repos/${s.owner}/${s.repo}`,
   );
   if (!res.ok) {
